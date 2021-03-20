@@ -1,0 +1,59 @@
+{
+  "env": {
+      "browser": true,
+      "es6": true
+  },
+  "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
+  ],
+  "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+      "ecmaVersion": 2021,
+      "ecmaFeatures": {"experimentalDecorators": true},
+      "sourceType": "module",
+      "project": "./tsconfig.json",
+      "tsconfigRootDir": "."
+  },
+  "plugins": [
+      "@typescript-eslint"
+  ],
+  "rules": {
+      "indent": [1, 2, {
+          "SwitchCase": 1
+      }],
+      "max-len": [1, { "code": 150 }],
+      "object-curly-spacing": [1, "always"],
+      "quotes": [1, "single"],
+      "sort-imports": [1, {
+          "ignoreCase": false,
+          "ignoreDeclarationSort": true,
+          "ignoreMemberSort": true,
+          "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+      }],
+      "new-cap": 0,
+      "require-jsdoc": 0,
+      "arrow-parens": 0,
+      "no-console": 1,
+      "sort-keys": [0, "asc", {"caseSensitive": true, "natural": false, "minKeys": 2}],
+      "no-shadow": [1, { "builtinGlobals": false, "hoist": "all", "allow": [] }],
+      "no-unused-expressions": 1,
+      "no-useless-return": 1,
+      "no-unused-vars": 1,
+      "camelcase": 1,
+      "brace-style": [1, "1tbs", { "allowSingleLine": true }],
+      "operator-linebreak": "off",
+      "linebreak-style": 0,
+      "@typescript-eslint/no-inferrable-types": [
+          0,
+          {
+            "ignoreParameters": true
+          }
+      ]
+  }
+}
