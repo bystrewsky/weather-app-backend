@@ -13,7 +13,7 @@ import { Env } from './common/env';
       entities: [],
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [ AppController ],
+  providers: [ AppService ],
 })
 export class AppModule {}
