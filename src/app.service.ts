@@ -1,9 +1,12 @@
 import { HttpException, HttpService, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
+import { Repository } from 'typeorm';
 import { OneDayForecastDto } from './common/dto/one-day-forecast.dto';
 import { OpenWeatherForecastElementDto } from './common/dto/open-weather-forecast-element.dto';
 import { OpenWeatherResponseDto } from './common/dto/open-weather-response.dto';
 import { ResponseGetForecastDto } from './common/dto/response-get-forecast.dto';
+import { Forecast } from './common/entity/forecast.entity';
 import { Env } from './common/env';
 
 @Injectable()
@@ -11,7 +14,9 @@ export class AppService {
   private coefficient: number = 0.02;
 
   constructor(
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    @InjectRepository(Forecast)
+    private readonly forecastRepository: Repository<Forecast>
   ) { }
 
   private getIndex(length: number, currentIndex: number, step: number, isPositive = true): number {
@@ -67,6 +72,19 @@ export class AppService {
     return forecasts;
   }
 
+  private async findCachedForecast(cityName: string): Promise<Forecast> {
+    const now = new Date();
+
+    return await this.forecastRepository.createQueryBuilder()
+      .where('cityName = :cityName', { cityName })
+      .andWhere('createdAt >= :date', { date: new Date(now.setHours(0, 0, 0, 0)) })
+      .getOne();
+  }
+
+  private async createCachedForecast(data: ResponseGetForecastDto): Promise<void> {
+    await this.forecastRepository.save(new Forecast(data.cityName, data.forecast));
+  }
+
   private async requestForecast(searchQuery: string): Promise<ResponseGetForecastDto> {
     let result: AxiosResponse<OpenWeatherResponseDto>;
 
@@ -85,15 +103,27 @@ export class AppService {
   }
 
   public async getForecast(cityName: string): Promise<ResponseGetForecastDto> {
+    const cachedForecast: Forecast = await this.findCachedForecast(cityName);
+
+    if (cachedForecast) {
+      return {
+        cityName: cachedForecast.cityName,
+        forecast: cachedForecast.forecastData as OneDayForecastDto[],
+      };
+    }
+
     const givenForecast: ResponseGetForecastDto = await this.requestForecast(cityName);
     const extendedForecast: OneDayForecastDto[] = this.extendForecast(givenForecast.forecast);
-
-    return {
+    const dataToReturn: ResponseGetForecastDto = {
       cityName: givenForecast.cityName,
       forecast: [
         ...givenForecast.forecast,
         ...extendedForecast,
       ],
     };
+
+    await this.createCachedForecast(dataToReturn);
+
+    return dataToReturn;
   }
 }
