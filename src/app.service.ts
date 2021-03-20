@@ -8,9 +8,49 @@ import { Env } from './common/env';
 
 @Injectable()
 export class AppService {
+  private coefficient: number = 0.02;
+
   constructor(
     private readonly httpService: HttpService
-  ) {}
+  ) { }
+
+  private getIndex(length: number, currentIndex: number, step: number, isPositive = true): number {
+    if (isPositive) {
+      return currentIndex + step < length ? currentIndex + step : currentIndex + step - length;
+    }
+
+    return currentIndex - step >= 0 ? currentIndex - step : length - Math.abs(currentIndex - step);
+  }
+
+  private getAvgTemperature(data, index, isPositive = true): number {
+    let tempSum: number = 0;
+
+    for (let i = 1; i <= 3; i++) {
+      tempSum += data[this.getIndex(data.length, index, i, isPositive)].temperature;
+    }
+
+    return Number((tempSum / 3).toFixed(2));
+  }
+
+  private extendForecast(data: OneDayForecastDto[]): OneDayForecastDto[] {
+    const forecastLength: number = data.length;
+    const extendedResults: OneDayForecastDto[] = [];
+
+    for (let i = 0; i < forecastLength; i++) {
+      const tempAvgBefore: number = this.getAvgTemperature(data, i, false) * (1 - i * this.coefficient);
+      const tempAvgAfter: number = this.getAvgTemperature(data, i, true) * i * this.coefficient;
+      const temperature: number = (data[i].temperature + tempAvgBefore + tempAvgAfter) / 2;
+
+      extendedResults.push(
+        new OneDayForecastDto(
+          Number(temperature.toFixed(2)),
+          new Date(data[i].date.getTime() + 5 * 24 * 60 * 60 * 1000),
+        )
+      );
+    }
+
+    return extendedResults;
+  }
 
   private parseForecastResult(data: OpenWeatherForecastElementDto[]): OneDayForecastDto[] {
     if (!data || !data.length) {
@@ -45,6 +85,15 @@ export class AppService {
   }
 
   public async getForecast(cityName: string): Promise<ResponseGetForecastDto> {
-    return await this.requestForecast(cityName);
+    const givenForecast: ResponseGetForecastDto = await this.requestForecast(cityName);
+    const extendedForecast: OneDayForecastDto[] = this.extendForecast(givenForecast.forecast);
+
+    return {
+      cityName: givenForecast.cityName,
+      forecast: [
+        ...givenForecast.forecast,
+        ...extendedForecast,
+      ],
+    };
   }
 }
