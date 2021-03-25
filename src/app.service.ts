@@ -49,7 +49,7 @@ export class AppService {
       extendedResults.push(
         new OneDayForecastDto(
           Number(temperature.toFixed(2)),
-          new Date(data[i].date.getTime() + 5 * 24 * 60 * 60 * 1000),
+          data[i].date + 5 * 24 * 60 * 60,
         )
       );
     }
@@ -65,7 +65,7 @@ export class AppService {
     const forecasts: OneDayForecastDto[] = data.map(item => {
       return new OneDayForecastDto(
         item.main.temp,
-        new Date(item.dt * 1000)
+        item.dt,
       )
     });
 
