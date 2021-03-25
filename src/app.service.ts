@@ -93,7 +93,7 @@ export class AppService {
         params: { q: searchQuery, appid: Env.OPEN_WEATHER_MAP_API_KEY, units: 'metric' },
       }).toPromise();
     } catch (e) {
-      throw new HttpException(e.response.statusText, e.response.status);
+      throw new HttpException(e.response.status === HttpStatus.NOT_FOUND ? 'City not found' : e.response.statusText, e.response.status);
     }
 
     return {

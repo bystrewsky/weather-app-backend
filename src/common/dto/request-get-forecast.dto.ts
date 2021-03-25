@@ -1,9 +1,7 @@
-import { IsDefined, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 
 export class RequestGetForecastDto {
-  @IsDefined()
-  @IsNotEmpty()
-  @IsString()
-  @Length(2)
+  @IsString({ message: 'City name must be a string' })
+  @Length(2, 64, { message: 'City name must contain at least 2 symbols' })
   city: string;
 }

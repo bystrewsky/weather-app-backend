@@ -5,7 +5,8 @@ import { Env } from './common/env';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
+  app.enableCors();
+  app.useGlobalPipes(new ValidationPipe({ strictGroups: false }));
   await app.listen(Env.APP_PORT);
 }
 bootstrap();
