@@ -1,4 +1,4 @@
-export class OneDayForecastDto {
+export class ThreeHourForecastDto {
   constructor(
     public temperature: number,
     public date: number,

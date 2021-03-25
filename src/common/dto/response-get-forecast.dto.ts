@@ -1,6 +1,6 @@
-import { OneDayForecastDto } from './one-day-forecast.dto';
+import { ThreeHourForecastDto } from './one-day-forecast.dto';
 
 export class ResponseGetForecastDto {
   cityName: string;
-  forecast: OneDayForecastDto[];
+  forecast: ThreeHourForecastDto[];
 }

@@ -2,7 +2,7 @@ import { HttpException, HttpService, HttpStatus, Injectable } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
 import { Repository } from 'typeorm';
-import { OneDayForecastDto } from './common/dto/one-day-forecast.dto';
+import { ThreeHourForecastDto } from './common/dto/one-day-forecast.dto';
 import { OpenWeatherForecastElementDto } from './common/dto/open-weather-forecast-element.dto';
 import { OpenWeatherResponseDto } from './common/dto/open-weather-response.dto';
 import { ResponseGetForecastDto } from './common/dto/response-get-forecast.dto';
@@ -37,9 +37,9 @@ export class AppService {
     return Number((tempSum / 3).toFixed(2));
   }
 
-  private extendForecast(data: OneDayForecastDto[]): OneDayForecastDto[] {
+  private extendForecast(data: ThreeHourForecastDto[]): ThreeHourForecastDto[] {
     const forecastLength: number = data.length;
-    const extendedResults: OneDayForecastDto[] = [];
+    const extendedResults: ThreeHourForecastDto[] = [];
 
     for (let i = 0; i < forecastLength; i++) {
       const tempAvgBefore: number = this.getAvgTemperature(data, i, false) * (1 - i * this.coefficient);
@@ -47,7 +47,7 @@ export class AppService {
       const temperature: number = (data[i].temperature + tempAvgBefore + tempAvgAfter) / 2;
 
       extendedResults.push(
-        new OneDayForecastDto(
+        new ThreeHourForecastDto(
           Number(temperature.toFixed(2)),
           data[i].date + 5 * 24 * 60 * 60,
         )
@@ -57,13 +57,13 @@ export class AppService {
     return extendedResults;
   }
 
-  private parseForecastResult(data: OpenWeatherForecastElementDto[]): OneDayForecastDto[] {
+  private parseForecastResult(data: OpenWeatherForecastElementDto[]): ThreeHourForecastDto[] {
     if (!data || !data.length) {
       throw new HttpException('Cannot parse OpenWeather response', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    const forecasts: OneDayForecastDto[] = data.map(item => {
-      return new OneDayForecastDto(
+    const forecasts: ThreeHourForecastDto[] = data.map(item => {
+      return new ThreeHourForecastDto(
         item.main.temp,
         item.dt,
       )
@@ -108,12 +108,12 @@ export class AppService {
     if (cachedForecast) {
       return {
         cityName: cachedForecast.cityName,
-        forecast: cachedForecast.forecastData as OneDayForecastDto[],
+        forecast: cachedForecast.forecastData as ThreeHourForecastDto[],
       };
     }
 
     const givenForecast: ResponseGetForecastDto = await this.requestForecast(cityName);
-    const extendedForecast: OneDayForecastDto[] = this.extendForecast(givenForecast.forecast);
+    const extendedForecast: ThreeHourForecastDto[] = this.extendForecast(givenForecast.forecast);
     const dataToReturn: ResponseGetForecastDto = {
       cityName: givenForecast.cityName,
       forecast: [

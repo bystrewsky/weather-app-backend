@@ -1,5 +1,5 @@
 import { AfterLoad, BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { OneDayForecastDto } from '../dto/one-day-forecast.dto';
+import { ThreeHourForecastDto } from '../dto/one-day-forecast.dto';
 
 @Entity()
 export class Forecast {
@@ -7,7 +7,7 @@ export class Forecast {
   id: number;
 
   @Column({ type: 'simple-array', nullable: false })
-  forecastData: string | OneDayForecastDto[];
+  forecastData: string | ThreeHourForecastDto[];
 
   @Column({ type: 'text' })
   cityName: string;
@@ -27,7 +27,7 @@ export class Forecast {
 
   constructor(
     cityName: string,
-    forecastData: OneDayForecastDto[]
+    forecastData: ThreeHourForecastDto[]
   ) {
     this.cityName = cityName;
     this.forecastData = forecastData;
